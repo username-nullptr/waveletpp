@@ -1,0 +1,6 @@
+if (CMAKE_COMPILER_IS_GNUCXX)
+	include(CheckCXXCompilerFlag)
+	check_cxx_compiler_flag("-Wa,-mbig-obj" GNU_BIG_OBJ_FLAG_ENABLE)
+	message(STATUS GNU_BIG_OBJ_FLAG_ENABLE=${GNU_BIG_OBJ_FLAG_ENABLE})
+endif ()
+add_executable(example main.cpp)
