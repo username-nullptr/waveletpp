@@ -50,16 +50,23 @@ constexpr const CharT *filter_name()
 #define X_MACRO(e,n) if constexpr( Filter == filter::e ) return n;
 		WAVELETPP_FILTER_LIST
 #undef X_MACRO
+		else
+		{
+			static_assert(false, "Invalid filter type");
+			return "";
+		}
 	}
 	else
 	{
 #define X_MACRO(e,n) if constexpr( Filter == filter::e ) return L##n;
 		WAVELETPP_FILTER_LIST
 #undef X_MACRO
+		else
+		{
+			static_assert(false, "Invalid filter type");
+			return L"";
+		}t
 	}
-	throw std::invalid_argument (
-		"waveletpp::filter_name: Invalid filter"
-	);
 }
 
 template <filter Filter>
