@@ -33,28 +33,16 @@ public:
 
 		for(int i=0; i<m_data.src.size(); i+=2)
 		{
-			double d_jg = 0;
-			double d_gt = 0;
+			double d_low = 0;
+			double d_high = 0;
 			for(int j=0; j<lo_d_a.size(); j++)
 			{
-				if( i + j - 3 < 0 )
-				{
-					d_jg += m_data.src[m_data.src.size() + i + j - 3] * lo_d_a[j];
-					d_gt += m_data.src[m_data.src.size() + i + j - 3] * hi_d_a[j];
-				}
-				else if( i + j - 3 > m_data.src.size() - 1 )
-				{
-					d_jg += m_data.src[i + j - 3 - m_data.src.size()] * lo_d_a[j];
-					d_gt += m_data.src[i + j - 3 - m_data.src.size()] * hi_d_a[j];
-				}
-				else
-				{
-					d_jg += m_data.src[i + j - 3] * lo_d_a[j];
-					d_gt += m_data.src[i + j - 3] * hi_d_a[j];
-				}
+				int idx = (i + j + static_cast<int>(m_data.src.size())) % m_data.src.size();
+				d_low += m_data.src[idx] * lo_d_a[j];
+				d_high += m_data.src[idx] * hi_d_a[j];
 			}
-			m_data.dec.high.emplace_back(d_gt);
-			m_data.dec.low.emplace_back(d_jg);
+			m_data.dec.high.emplace_back(d_high);
+			m_data.dec.low.emplace_back(d_low);
 		}
 		if( m_data.src.size() % 2 )
 		{
@@ -80,72 +68,61 @@ public:
 
 		for(int i=0; i<l_data.size(); i++)
 		{
-			double d_jg = 0.0;
-			double d_gt = 0.0;
+			double d_high = 0.0;
+			double d_low = 0.0;
 			int j = 0;
 
-			auto do_one = [&](int m)
+			auto do_one = [&](int m) mutable
 			{
-				if( m < 0 )
-				{
-					d_jg += l_data[m + l_data.size()] * lo_r_a[j];
-					d_gt += h_data[m + h_data.size()] * hi_r_a[j];
-				}
-				else if( m > l_data.size() - 1 )
-				{
-					d_jg += l_data[m - l_data.size()] * lo_r_a[j];
-					d_gt += h_data[m - h_data.size()] * hi_r_a[j];
-				}
-				else
-				{
-					d_jg += l_data[m] * lo_r_a[j];
-					d_gt += h_data[m] * hi_r_a[j];
-				}
+				int idx = (m + static_cast<int>(l_data.size())) % l_data.size();
+				d_high += h_data[idx] * hi_r_a[j];
+				d_low += l_data[idx] * lo_r_a[j];
 			};
+			int filter_size = static_cast<int>(lo_d_a.size());
 			for(j=0; j<lo_d_a.size(); j+=2)
-				do_one(i + j / 2 - 2);
-			m_data.rec.emplace_back(d_jg + d_gt);
+				do_one(i + j / 2 - filter_size / 2);
+			m_data.rec.emplace_back(d_low + d_high);
 
-			d_jg = d_gt = 0.0;
+			d_high = d_low = 0.0;
 			for(j=1; j<lo_d_a.size(); j+=2)
-				do_one(i + (j + 1) / 2 - 2);
-			m_data.rec.emplace_back(d_jg + d_gt);
+				do_one(i + (j + 1) / 2 - filter_size / 2);
+			m_data.rec.emplace_back(d_low + d_high);
 		}
 	}
 
 public:
-	static void default_extend(vector_t &data) // Symmetric
+	[[nodiscard]] static size_t default_extend(vector_t &data, filter_t filter) // Symmetric
 	{
-		auto src_front = data.front();
-		auto src_back = data.back();
 		auto src_size = data.size();
+		auto ext_size = lo_d(filter).size();
 
-		std::vector xdata(src_size * 3 - 2, 0.0);
+		std::vector xdata(src_size + ext_size * 2, 0.0);
 		for(int i=0; i<src_size; i++)
-			xdata[src_size + i - 1] = data[i];
+			xdata[ext_size + i] = data[i];
 
-		for(int i=1; i<src_size; i++)
-		{
-			xdata[src_size - i] = 2 * src_front - data[i];
-			xdata[src_size * 2 + i - 2] = 2 * src_back - data[src_size - 1 - i];
-		}
+		for(int i=0; i<ext_size; i++)
+			xdata[i] = data[ext_size - 1 - i];
+		for(int i=0; i<ext_size; i++)
+			xdata[ext_size + src_size + i] = data[src_size - 1 - i];
+
 		data = std::move(xdata);
+		return ext_size;
 	}
 
-	static void default_unextend(vector_t &xdata) // Symmetric
+	static void unexternd(vector_t &data, size_t ext_size)
 	{
-		auto tmp = std::move(xdata);
-		auto offset = tmp.size() / 3;
-		auto size = offset + static_cast<size_t>((tmp.size() - offset) / 2.0 + 0.5);
-		while( offset < size )
-			xdata.emplace_back(tmp[offset++]);
+		auto src_size = data.size() - ext_size * 2;
+		std::vector xdata(src_size, 0.0);
+
+		for(size_t i=0; i<src_size; i++)
+			xdata[i] = data[ext_size + i];
+		data = std::move(xdata);
 	}
 
 public:
 	filter_t m_filter;
 	data_t m_data;
 	ext_method_t m_ext_func = default_extend;
-	uext_method_t m_uext_func = default_unextend;
 };
 
 template <typename T>
@@ -221,14 +198,15 @@ typename basic_transform<T>::decomposed_t &basic_transform<T>::dwt(bool ext)
 		m_impl->m_data.dec.high.clear();
 		return m_impl->m_data.dec;
 	}
+	size_t ext_size = 0;
 	if( ext )
-		m_impl->m_ext_func(m_impl->m_data.src);
+		ext_size = m_impl->m_ext_func(m_impl->m_data.src, m_impl->m_filter);
 
 	m_impl->dwt();
 	if( ext )
 	{
-		m_impl->m_uext_func(m_impl->m_data.dec.high);
-		m_impl->m_uext_func(m_impl->m_data.dec.low);
+		m_impl->unexternd(m_impl->m_data.dec.high, ext_size / 2);
+		m_impl->unexternd(m_impl->m_data.dec.low, ext_size / 2);
 	}
 	return m_impl->m_data.dec;
 }
@@ -241,15 +219,16 @@ typename basic_transform<T>::vector_t &basic_transform<T>::idwt(bool ext)
 		m_impl->m_data.rec.clear();
 		return m_impl->m_data.rec;
 	}
+	size_t ext_size[2] {0,0};
 	if( ext )
 	{
-		m_impl->m_ext_func(m_impl->m_data.dec.high);
-		m_impl->m_ext_func(m_impl->m_data.dec.low);
+		ext_size[0] = m_impl->m_ext_func(m_impl->m_data.dec.high, m_impl->m_filter);
+		ext_size[1] = m_impl->m_ext_func(m_impl->m_data.dec.low, m_impl->m_filter);
 	}
 	m_impl->idwt();
 
 	if( ext )
-		m_impl->m_uext_func(m_impl->m_data.rec);
+		m_impl->unexternd(m_impl->m_data.rec, ext_size[0] + ext_size[1]);
 	return m_impl->m_data.rec;
 }
 
@@ -258,10 +237,12 @@ typename basic_transform<T>::vector_t &basic_transform<T>::lpf(T threshold, leve
 {
 	if( m_impl->m_data.src.size() < 3 && level == 0 )
 		return m_impl->m_data.src;
-
-	m_impl->m_ext_func(m_impl->m_data.src);
 	if( level > 8 )
 		level = 8;
+
+	size_t ext_size = 0;
+	for(level_t i=0; i<level; i++)
+		ext_size += m_impl->m_ext_func(m_impl->m_data.src, m_impl->m_filter);
 
 	auto tmp = m_impl->m_data.src;
 	std::vector<vector_t> h_datas;
@@ -289,7 +270,7 @@ typename basic_transform<T>::vector_t &basic_transform<T>::lpf(T threshold, leve
 	m_impl->m_data.rec = std::move(m_impl->m_data.dec.low);
 	m_impl->m_data.dec.high.clear();
 
-	m_impl->m_uext_func(m_impl->m_data.rec);
+	m_impl->unexternd(m_impl->m_data.rec, ext_size);
 	return m_impl->m_data.rec;
 }
 
@@ -318,10 +299,9 @@ typename basic_transform<T>::data_t &basic_transform<T>::data() noexcept
 }
 
 template <typename T>
-basic_transform<T> &basic_transform<T>::on_extend(ext_method_t ext, uext_method_t uext)
+basic_transform<T> &basic_transform<T>::on_extend(ext_method_t ext)
 {
 	m_impl->m_ext_func = std::move(ext);
-	m_impl->m_uext_func = std::move(uext);
 	return *this;
 }
 
@@ -329,7 +309,6 @@ template <typename T>
 basic_transform<T> &basic_transform<T>::def_extend()
 {
 	m_impl->m_ext_func = impl::default_extend;
-	m_impl->m_uext_func = impl::default_unextend;
 	return *this;
 }
 

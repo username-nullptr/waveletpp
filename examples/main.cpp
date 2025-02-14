@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	ofile.close();
 
 	// auto &ddata = wavelet.dwt();
-	//
+
 	// std::ofstream ofile_l("C:/Users/Administrator/Desktop/test.wavelet.data/w.csv.200/tttt_0_l.csv");
 	// for(auto data : ddata.low)
 	// 	ofile_l << data << "\n";

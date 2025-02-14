@@ -15,8 +15,7 @@ public:
 	using vector_t = std::vector<value_t>;
 
 	using level_t = size_t;
-	using ext_method_t = std::function<void(vector_t&)>;
-	using uext_method_t = std::function<void(vector_t&)>;
+	using ext_method_t = std::function<size_t(vector_t&,filter_t)>;
 
 	struct decomposed_t
 	{
@@ -57,7 +56,7 @@ public:
 	[[nodiscard]] data_t &data() noexcept;
 
 public:
-	basic_transform &on_extend(ext_method_t ext, uext_method_t uext);
+	basic_transform &on_extend(ext_method_t ext);
 	basic_transform &def_extend();
 
 private:
