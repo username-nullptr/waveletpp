@@ -40,33 +40,28 @@ namespace waveletpp { namespace detail
 	return buf;
 }
 
+template <typename, filter>
+struct filter_name {};
+
+#define X_MACRO(e,n) \
+	template <typename CharT> \
+	struct filter_name<CharT, filter::e> { \
+		static constexpr const CharT *get() { \
+			if constexpr( std::is_same_v<CharT,char> ) \
+				return n; \
+			else \
+				return L##n; \
+		} \
+	};
+	WAVELETPP_FILTER_LIST
+#undef X_MACRO
+
 } //namespace detail
 
 template <typename CharT, filter Filter>
 constexpr const CharT *filter_name()
 {
-	if constexpr( std::is_same_v<CharT,char> )
-	{
-#define X_MACRO(e,n) if constexpr( Filter == filter::e ) return n;
-		WAVELETPP_FILTER_LIST
-#undef X_MACRO
-		else
-		{
-			static_assert(false, "Invalid filter type");
-			return "";
-		}
-	}
-	else
-	{
-#define X_MACRO(e,n) if constexpr( Filter == filter::e ) return L##n;
-		WAVELETPP_FILTER_LIST
-#undef X_MACRO
-		else
-		{
-			static_assert(false, "Invalid filter type");
-			return L"";
-		}t
-	}
+	return detail::filter_name<CharT,Filter>::get();
 }
 
 template <filter Filter>
@@ -84,25 +79,16 @@ constexpr const wchar_t *wfilter_name()
 template <typename CharT>
 const CharT *filter_name(filter_t filter)
 {
-	if constexpr( std::is_same_v<CharT,char> )
+	switch( filter )
 	{
-		switch( filter )
-		{
-#define X_MACRO(e,n) case filter::e: return n;
-			WAVELETPP_FILTER_LIST
-			default: break;
+#define X_MACRO(e,n) case filter::e: \
+		if constexpr( std::is_same_v<CharT,char> ) \
+			return n; \
+		else \
+			return L##n;
+		WAVELETPP_FILTER_LIST
+		default: break;
 #undef X_MACRO
-		}
-	}
-	else
-	{
-		switch( filter )
-		{
-#define X_MACRO(e,n) case filter::e: return L##n;
-			WAVELETPP_FILTER_LIST
-			default: break;
-#undef X_MACRO
-		}
 	}
 	throw std::invalid_argument (
 		"rtbbt::wda::wavelet::from_filter_name: Invalid filter"
