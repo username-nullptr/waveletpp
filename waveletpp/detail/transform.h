@@ -78,14 +78,14 @@ public:
 				d_high += h_data[idx] * hi_r_a[j];
 				d_low += l_data[idx] * lo_r_a[j];
 			};
-			int filter_size = static_cast<int>(lo_d_a.size());
+			int offset = static_cast<int>(lo_d_a.size()) / 2;
 			for(j=0; j<lo_d_a.size(); j+=2)
-				do_one(i + j / 2 - filter_size / 2);
+				do_one(i + j / 2 - offset);
 			m_data.rec.emplace_back(d_low + d_high);
 
 			d_high = d_low = 0.0;
 			for(j=1; j<lo_d_a.size(); j+=2)
-				do_one(i + (j + 1) / 2 - filter_size / 2);
+				do_one(i + (j + 1) / 2 - offset);
 			m_data.rec.emplace_back(d_low + d_high);
 		}
 	}
