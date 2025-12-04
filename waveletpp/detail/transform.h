@@ -66,7 +66,7 @@ public:
 		auto lo_r_a = lo_r(m_filter);
 		auto hi_r_a = hi_r(m_filter);
 
-		for(int i=0; i<l_data.size(); i++)
+		for(int i=0; i<static_cast<int>(l_data.size()); i++)
 		{
 			double d_high = 0.0;
 			double d_low = 0.0;
@@ -79,12 +79,12 @@ public:
 				d_low += l_data[idx] * lo_r_a[j];
 			};
 			int offset = static_cast<int>(lo_d_a.size()) / 2;
-			for(j=0; j<lo_d_a.size(); j+=2)
+			for(j=0; j<static_cast<int>(lo_d_a.size()); j+=2)
 				do_one(i + j / 2 - offset);
 			m_data.rec.emplace_back(d_low + d_high);
 
 			d_high = d_low = 0.0;
-			for(j=1; j<lo_d_a.size(); j+=2)
+			for(j=1; j<static_cast<int>(lo_d_a.size()); j+=2)
 				do_one(i + (j + 1) / 2 - offset);
 			m_data.rec.emplace_back(d_low + d_high);
 		}
@@ -96,13 +96,13 @@ public:
 		auto src_size = data.size();
 		auto ext_size = lo_d(filter).size();
 
-		std::vector xdata(src_size + ext_size * 2, 0.0);
-		for(int i=0; i<src_size; i++)
+		std::vector xdata(src_size + ext_size * 2, type_tool<value_t>::zero);
+		for(int i=0; i<static_cast<int>(src_size); i++)
 			xdata[ext_size + i] = data[i];
 
-		for(int i=0; i<ext_size; i++)
+		for(int i=0; i<static_cast<int>(ext_size); i++)
 			xdata[i] = data[ext_size - 1 - i];
-		for(int i=0; i<ext_size; i++)
+		for(int i=0; i<static_cast<int>(ext_size); i++)
 			xdata[ext_size + src_size + i] = data[src_size - 1 - i];
 
 		data = std::move(xdata);
@@ -112,7 +112,7 @@ public:
 	static void unexternd(vector_t &data, size_t ext_size)
 	{
 		auto src_size = data.size() - ext_size * 2;
-		std::vector xdata(src_size, 0.0);
+		std::vector xdata(src_size, type_tool<value_t>::zero);
 
 		for(size_t i=0; i<src_size; i++)
 			xdata[i] = data[ext_size + i];
