@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 		wavelet.data().src.emplace_back(std::stod(buf));
 	ifile.close();
 
-	auto &wdata = wavelet.lpf(1.0);
+	auto &wdata = wavelet.lpf({1.0});
 	std::ofstream ofile("C:/Users/Administrator/Desktop/test.wavelet.data/w.csv.200/tttt_0.csv");
 
 	for(auto &data : wdata)

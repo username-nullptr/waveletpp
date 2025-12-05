@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-set(PRO_VERSION 0.1.1)
+set(PRO_VERSION 0.1.0)
 set(PRO_NAME waveletpp)
 
 project(${PRO_NAME} VERSION ${PRO_VERSION} LANGUAGES C CXX)

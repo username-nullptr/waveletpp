@@ -1,7 +1,36 @@
+
+/************************************************************************************
+*                                                                                   *
+*   Copyright (c) 2024-2025 Xiaoqiang <username_nullptr@163.com>                    *
+*                                                                                   *
+*   This file is part of LIBGS                                                      *
+*   License: MIT License                                                            *
+*                                                                                   *
+*   Permission is hereby granted, free of charge, to any person obtaining a copy    *
+*   of this software and associated documentation files (the "Software"), to deal   *
+*   in the Software without restriction, including without limitation the rights    *
+*   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell       *
+*   copies of the Software, and to permit persons to whom the Software is           *
+*   furnished to do so, subject to the following conditions:                        *
+*                                                                                   *
+*   The above copyright notice and this permission notice shall be included in      *
+*   all copies or substantial portions of the Software.                             *
+*                                                                                   *
+*   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR      *
+*   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,        *
+*   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE     *
+*   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER          *
+*   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,   *
+*   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE   *
+*   SOFTWARE.                                                                       *
+*                                                                                   *
+*************************************************************************************/
+
 #ifndef WAVELETPP_TRANSFORM_H
 #define WAVELETPP_TRANSFORM_H
 
 #include <waveletpp/filter.h>
+#include <waveletpp/types.h>
 #include <functional>
 
 namespace waveletpp
@@ -15,7 +44,7 @@ public:
 	using vector_t = std::vector<value_t>;
 
 	using level_t = size_t;
-	using ext_method_t = std::function<size_t(vector_t&,filter_t)>;
+	using ext_method_t = std::function<size_t(vector_t&,size_t)>;
 
 	struct decomposed_t
 	{
@@ -27,6 +56,11 @@ public:
 		vector_t src {};
 		vector_t rec {};
 		decomposed_t dec {};
+	};
+	struct param_t
+	{
+		value_t threshold = type_tool<value_t>::zero;
+		level_t level = 1;
 	};
 
 public:
@@ -46,12 +80,12 @@ public:
 
 	decomposed_t &dwt(bool ext = true);
 	vector_t &idwt(bool ext = true);
-
-	vector_t &lpf(T threshold, level_t level = 1);
-	vector_t &lpf(level_t level = 1);
+	vector_t &lpf(param_t param = {});
 
 public:
 	[[nodiscard]] filter_t filter() const noexcept;
+	[[nodiscard]] size_t filter_size() const noexcept;
+
 	[[nodiscard]] const data_t &data() const noexcept;
 	[[nodiscard]] data_t &data() noexcept;
 
@@ -65,6 +99,7 @@ private:
 };
 
 using int_transform = basic_transform<int>;
+using long_transform = basic_transform<long>;
 using double_transform = basic_transform<double>;
 using transform = double_transform;
 
