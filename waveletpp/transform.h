@@ -6,14 +6,22 @@
 
 #include <waveletpp/filter.h>
 #include <waveletpp/types.h>
+#include <type_traits>
 #include <functional>
 
 namespace waveletpp
 {
 
 template <typename T>
+constexpr bool is_transform_value_supported_v = std::is_floating_point_v<T>;
+
+template <typename T>
 class WAVELETPP_TAPI basic_transform
 {
+	static_assert(is_transform_value_supported_v<T>,
+		"waveletpp::basic_transform requires a floating-point value type"
+	);
+
 public:
 	using value_t = T;
 	using vector_t = std::vector<value_t>;
@@ -46,7 +54,7 @@ public:
 	basic_transform(const basic_transform &other);
 	basic_transform &operator=(const basic_transform &other);
 
-	basic_transform(basic_transform &&other) noexcept;
+	basic_transform(basic_transform &&other) noexcept ;
 	basic_transform &operator=(basic_transform &&other) noexcept;
 
 public:
@@ -73,9 +81,9 @@ private:
 	impl *m_impl;
 };
 
-using int_transform = basic_transform<int>;
-using long_transform = basic_transform<long>;
+using float_transform = basic_transform<float>;
 using double_transform = basic_transform<double>;
+using long_double_transform = basic_transform<long double>;
 using transform = double_transform;
 
 } //namespace waveletpp

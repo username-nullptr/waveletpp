@@ -73,8 +73,7 @@ void write_csv
 
 } // namespace
 
-int main(int argc, char *argv[])
-try
+int main(int argc, char *argv[]) try
 {
 	if( argc > 2 )
 	{

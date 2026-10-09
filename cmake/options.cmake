@@ -15,8 +15,19 @@ option(WAVELETPP_BUILD_EXAMPLES
 	"-- ${PRO_NAME}: Enable this to build the examples."
 	${waveletpp_build_examples_default}
 )
+option(WAVELETPP_ENABLE_FAST_MATH
+	"-- ${PRO_NAME}: Enable non-strict floating-point optimizations for consumers." OFF
+)
 if (WAVELETPP_BUILD_EXAMPLES)
 	message(STATUS "${PRO_NAME}: Enable this to build the examples.")
+endif ()
+if (WAVELETPP_ENABLE_FAST_MATH)
+	if (NOT MSVC AND NOT CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
+		message(FATAL_ERROR
+			"${PRO_NAME}: Fast math requires MSVC, GCC, Clang, or AppleClang."
+		)
+	endif ()
+	message(STATUS "${PRO_NAME}: Enable non-strict floating-point optimizations.")
 endif ()
 
 unset(waveletpp_build_examples_default)

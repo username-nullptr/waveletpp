@@ -70,6 +70,28 @@ ctest --test-dir build --output-on-failure
 Set `WAVELETPP_ENABLE_TEST_SANITIZERS=ON` to instrument functional tests with
 AddressSanitizer and, where supported, UndefinedBehaviorSanitizer.
 
+To build and run the standalone transform performance benchmarks, use a release
+configuration and the dedicated target:
+
+```sh
+cmake -S . -B build-performance \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=ON \
+    -DWAVELETPP_BUILD_CMAKE_TESTS=OFF \
+    -DWAVELETPP_BUILD_PERFORMANCE_TESTS=ON
+cmake --build build-performance --target waveletpp.performance
+```
+
+Performance results are informational and are not registered as pass/fail CTest
+tests. See [`test/performance`](../test/performance/README.md) for arguments and
+measurement details.
+
+For workloads that do not require strict IEEE floating-point behavior,
+`WAVELETPP_ENABLE_FAST_MATH=ON` enables the compiler's aggressive floating-point
+optimizations for targets that link `waveletpp::waveletpp`. This can improve DWT
+throughput substantially, but permits reassociation and changes NaN, infinity,
+signed-zero, rounding, and reproducibility behavior. It is disabled by default.
+
 ## CMake options
 
 | Option | Default | Description |
@@ -77,6 +99,8 @@ AddressSanitizer and, where supported, UndefinedBehaviorSanitizer.
 | `BUILD_TESTING` | `OFF` | Builds and registers the functional tests |
 | `WAVELETPP_BUILD_CMAKE_TESTS` | value of `BUILD_TESTING` | Tests the installed CMake package |
 | `WAVELETPP_ENABLE_TEST_SANITIZERS` | `OFF` | Enables AddressSanitizer and, where available, UndefinedBehaviorSanitizer for tests |
+| `WAVELETPP_BUILD_PERFORMANCE_TESTS` | `OFF` | Builds the standalone transform performance benchmarks |
+| `WAVELETPP_ENABLE_FAST_MATH` | `OFF` | Enables non-strict floating-point optimizations for consumers |
 | `WAVELETPP_BUILD_EXAMPLES` | `OFF` | Builds the example programs |
 | `WAVELETPP_STRICT_WARNINGS` | `ON` | Enables strict warnings for first-party compiled targets |
 | `WAVELETPP_WARNINGS_AS_ERRORS` | `OFF` | Treats first-party warnings as errors |

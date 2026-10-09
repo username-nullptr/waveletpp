@@ -52,7 +52,11 @@ function(add_waveletpp_functional_test name source)
 	endif ()
 endfunction()
 
+
 add_subdirectory(functional)
+if (WAVELETPP_BUILD_PERFORMANCE_TESTS)
+	add_subdirectory(performance)
+endif ()
 
 if (WAVELETPP_BUILD_CMAKE_TESTS)
 	add_subdirectory(cmake)

@@ -59,6 +59,7 @@ struct test_case
 inline int run(std::initializer_list<test_case> tests)
 {
 	std::size_t passed = 0;
+	std::size_t failed = 0;
 	for(const auto &test : tests)
 	{
 		try
@@ -70,16 +71,16 @@ inline int run(std::initializer_list<test_case> tests)
 		catch(const std::exception &error)
 		{
 			std::cerr << "[FAIL] " << test.name << ": " << error.what() << '\n';
-			return 1;
+			++failed;
 		}
 		catch(...)
 		{
 			std::cerr << "[FAIL] " << test.name << ": unknown exception\n";
-			return 1;
+			++failed;
 		}
 	}
-	std::cout << passed << " test cases passed\n";
-	return 0;
+	std::cout << passed << " test cases passed, " << failed << " failed\n";
+	return failed == 0 ? 0 : 1;
 }
 
 } // namespace waveletpp::test

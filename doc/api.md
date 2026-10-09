@@ -7,13 +7,15 @@ All public interfaces are in the `waveletpp` namespace. Include `<waveletpp.hpp>
 The default `waveletpp::transform` type is an alias for `waveletpp::basic_transform<double>`. The following aliases are available:
 
 ```cpp
-using int_transform = basic_transform<int>;
-using long_transform = basic_transform<long>;
+using float_transform = basic_transform<float>;
 using double_transform = basic_transform<double>;
+using long_double_transform = basic_transform<long double>;
 using transform = double_transform;
 ```
 
-`basic_transform<T>` supports the built-in integer and floating-point types for which `type_tool<T>` is defined.
+`basic_transform<T>` requires a floating-point value type. Integral storage is
+rejected at compile time because ordinary wavelet coefficients cannot be
+represented losslessly by an integral container.
 
 ## Constructors
 
@@ -52,7 +54,9 @@ struct param_t
 };
 ```
 
-`threshold` is the wavelet threshold. `level` is the decomposition level, with a maximum effective value of `8`.
+`threshold` is the wavelet threshold and must be finite and non-negative.
+`level == 0` returns the source unchanged; levels greater than `8` are clamped
+to `8`.
 
 ### `decomposed_t`
 
@@ -140,7 +144,12 @@ The boundary-extension callback type is:
 using ext_method_t = std::function<std::size_t(vector_t &, std::size_t)>;
 ```
 
-The callback extends the data in place. Its second argument is the current filter length, and its return value is the number of samples added to each side. The transform uses that value to trim the result afterward.
+The callback extends the data in place. Its second argument is the current
+filter length, and its return value is the number of samples added to each
+side. The returned width must be even, and the callback must increase the
+vector size by exactly twice that value. Invalid callbacks are rejected with
+`std::invalid_argument`, and the original input is restored if the callback
+throws.
 
 ```cpp
 wavelet.on_extend([](auto &data, std::size_t filter_size) -> std::size_t {

@@ -94,8 +94,7 @@ void print_samples(const signal_t &clean, const signal_t &noisy, const signal_t 
 
 } // namespace
 
-int main(int argc, char *argv[])
-try
+int main(int argc, char *argv[]) try
 {
 	if( argc > 2 )
 	{

@@ -10,6 +10,9 @@ option(WAVELETPP_BUILD_CMAKE_TESTS
 option(WAVELETPP_ENABLE_TEST_SANITIZERS
 	"-- ${PRO_NAME}: Enable AddressSanitizer and, where available, UndefinedBehaviorSanitizer for tests." OFF
 )
+option(WAVELETPP_BUILD_PERFORMANCE_TESTS
+	"-- ${PRO_NAME}: Build the standalone performance benchmarks." OFF
+)
 set(WAVELETPP_FUNCTIONAL_TIMEOUT 30 CACHE STRING
 	"CTest timeout in seconds for each Waveletpp functional executable."
 )
@@ -28,6 +31,12 @@ endforeach()
 if (WAVELETPP_BUILD_CMAKE_TESTS AND NOT BUILD_TESTING)
 	message(FATAL_ERROR
 		"${PRO_NAME}: CMake integration tests require BUILD_TESTING=ON."
+	)
+endif ()
+
+if (WAVELETPP_BUILD_PERFORMANCE_TESTS AND NOT BUILD_TESTING)
+	message(FATAL_ERROR
+		"${PRO_NAME}: Performance benchmarks require BUILD_TESTING=ON."
 	)
 endif ()
 

@@ -72,7 +72,7 @@ int main()
 
 The parameters follow these rules:
 
-- `threshold` defaults to the zero value of the selected numeric type.
+- `threshold` defaults to zero and must be finite and non-negative.
 - `level` defaults to `1`. A value of `0` returns the current input without decomposition.
 - The maximum decomposition level is `8`; larger values are treated as `8`.
 - No decomposition is performed when the input length is less than twice the filter length.
