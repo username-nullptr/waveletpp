@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2024-2026 Xiaoqiang <username_nullptr@163.com>
+# SPDX-License-Identifier: MIT
+
+@PACKAGE_INIT@
+
+set(Waveletpp_VERSION "@PROJECT_VERSION@")
+
+include("${CMAKE_CURRENT_LIST_DIR}/WaveletppTargets.cmake")
+
+check_required_components(Waveletpp)

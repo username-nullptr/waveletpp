@@ -1,34 +1,34 @@
-cmake_minimum_required(VERSION 3.12)
-set(PRO_VERSION 0.1.0)
-set(PRO_NAME waveletpp)
+# SPDX-FileCopyrightText: 2024-2026 Xiaoqiang <username_nullptr@163.com>
+# SPDX-License-Identifier: MIT
+
+cmake_minimum_required(VERSION 3.15)
+
+set(MAJOR_VERSION 0)
+set(MINOR_VERSION 2)
+set(PATCH_VERSION 0)
+
+set(PRO_VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION})
+set(PRO_NAME Waveletpp)
 
 project(${PRO_NAME} VERSION ${PRO_VERSION} LANGUAGES C CXX)
-add_definitions(-DLIBGS_VERSION_STR="${PRO_VERSION}-dev")
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
-include(utility)
-check_compiler_version(CMAKE_CXX_STANDARD)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-message(STATUS "")
-message(STATUS "${PRO_NAME}: using C++: " ${CMAKE_CXX_STANDARD})
-message(STATUS "${PRO_NAME}: build type: " ${CMAKE_BUILD_TYPE})
-message(STATUS "${PRO_NAME}: install prefix: " ${CMAKE_INSTALL_PREFIX})
+include(platform)
+include(warnings)
+include(options)
 
-set(output_dir ${CMAKE_BINARY_DIR}/output)
+add_subdirectory(waveletpp)
 
-if (CMAKE_BUILD_TYPE AND (CMAKE_BUILD_TYPE STREQUAL "Debug"))
-	add_definitions(-DLIBGS_DEBUG)
-endif()
+# Generate the installed package after all exported targets have been defined.
+include(provider)
 
-include_directories(.)
-option(BUILD_EXAMPLES "-- ${PRO_NAME}: enable this to build the examples" ON)
-
-if (BUILD_EXAMPLES)
-	message(STATUS "${PRO_NAME}: enable this to build the examples.")
+if (WAVELETPP_BUILD_EXAMPLES)
 	add_subdirectory(examples)
-endif()
+endif ()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES waveletpp.hpp)
-install(DIRECTORY waveletpp/ DESTINATION include/waveletpp/ FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
-install(FILES waveletpp.hpp DESTINATION include/)
+install(FILES waveletpp.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

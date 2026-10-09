@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: 2024-2026 Xiaoqiang <username_nullptr@163.com>
+// SPDX-License-Identifier: MIT
+
 #include <waveletpp.hpp>
 #include <fstream>
 #include <string>
 
-int main(int argc, char *argv[])
+int main()
 {
 	constexpr auto file_name = "C:/Users/Administrator/Desktop/test.wavelet.data/r.csv.200/tttt_0.csv";
 	std::ifstream ifile(file_name);
