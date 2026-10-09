@@ -155,7 +155,7 @@ basic_transform<T>::basic_transform(const basic_transform &other) :
 template <typename T>
 basic_transform<T> &basic_transform<T>::operator=(const basic_transform &other)
 {
-	if( this == &other )
+	if( this != &other )
 		*m_impl = *other.m_impl;
 	return *this;
 }
@@ -170,7 +170,7 @@ basic_transform<T>::basic_transform(basic_transform &&other) noexcept :
 template <typename T>
 basic_transform<T> &basic_transform<T>::operator=(basic_transform &&other) noexcept
 {
-	if( this == &other )
+	if( this != &other )
 		*m_impl = std::move(*other.m_impl);
 	return *this;
 }
@@ -199,14 +199,19 @@ typename basic_transform<T>::decomposed_t &basic_transform<T>::dwt(bool ext)
 		return m_impl->m_data.dec;
 	}
 	size_t ext_size = 0;
+	vector_t source;
 	if( ext )
+	{
+		source = m_impl->m_data.src;
 		ext_size = m_impl->m_ext_func(m_impl->m_data.src, filter_size());
+	}
 
 	m_impl->dwt();
 	if( ext )
 	{
 		m_impl->unexternd(m_impl->m_data.dec.high, ext_size / 2);
 		m_impl->unexternd(m_impl->m_data.dec.low, ext_size / 2);
+		m_impl->m_data.src = std::move(source);
 	}
 	return m_impl->m_data.dec;
 }
@@ -220,15 +225,20 @@ typename basic_transform<T>::vector_t &basic_transform<T>::idwt(bool ext)
 		return m_impl->m_data.rec;
 	}
 	size_t ext_size[2] {0,0};
+	decomposed_t decomposition;
 	if( ext )
 	{
+		decomposition = m_impl->m_data.dec;
 		ext_size[0] = m_impl->m_ext_func(m_impl->m_data.dec.high, filter_size());
 		ext_size[1] = m_impl->m_ext_func(m_impl->m_data.dec.low, filter_size());
 	}
 	m_impl->idwt();
 
 	if( ext )
+	{
 		m_impl->unexternd(m_impl->m_data.rec, ext_size[0] + ext_size[1]);
+		m_impl->m_data.dec = std::move(decomposition);
+	}
 	return m_impl->m_data.rec;
 }
 
@@ -244,11 +254,11 @@ typename basic_transform<T>::vector_t &basic_transform<T>::lpf(param_t param)
 	if( param.level > 8 )
 		param.level = 8;
 
+	auto source = m_impl->m_data.src;
 	size_t ext_size = 0;
 	for(level_t i=0; i<param.level; i++)
 		ext_size += m_impl->m_ext_func(m_impl->m_data.src, filter_size());
 
-	auto tmp = m_impl->m_data.src;
 	std::vector<vector_t> h_datas;
 
 	for(level_t i=0; i<param.level; i++)
@@ -263,7 +273,7 @@ typename basic_transform<T>::vector_t &basic_transform<T>::lpf(param_t param)
 		m_impl->m_data.src = std::move(m_impl->m_data.dec.low);
 	}
 	m_impl->m_data.dec.low = std::move(m_impl->m_data.src);
-	m_impl->m_data.src = std::move(tmp);
+	m_impl->m_data.src = std::move(source);
 
 	for(size_t i=0; i<h_datas.size(); i++)
 	{

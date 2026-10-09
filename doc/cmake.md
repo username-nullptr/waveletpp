@@ -45,22 +45,39 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/install
 cmake --build build
 ```
 
-## Build the repository example
+## Build the repository examples
 
-The repository builds `examples/main.cpp` by default:
+Enable the example programs explicitly:
 
 ```sh
-cmake -S . -B build
+cmake -S . -B build -DWAVELETPP_BUILD_EXAMPLES=ON
 cmake --build build
 ```
 
-The example executable is placed under `output/examples` in the build directory.
+The example executables are placed under `output/examples` in the build directory.
+
+## Build and run the tests
+
+Enable CTest while configuring, then build and run the registered functional and
+CMake package-consumer tests:
+
+```sh
+cmake -S . -B build -DBUILD_TESTING=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+Set `WAVELETPP_ENABLE_TEST_SANITIZERS=ON` to instrument functional tests with
+AddressSanitizer and, where supported, UndefinedBehaviorSanitizer.
 
 ## CMake options
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `WAVELETPP_BUILD_EXAMPLES` | `ON` | Builds the example program |
+| `BUILD_TESTING` | `OFF` | Builds and registers the functional tests |
+| `WAVELETPP_BUILD_CMAKE_TESTS` | value of `BUILD_TESTING` | Tests the installed CMake package |
+| `WAVELETPP_ENABLE_TEST_SANITIZERS` | `OFF` | Enables AddressSanitizer and, where available, UndefinedBehaviorSanitizer for tests |
+| `WAVELETPP_BUILD_EXAMPLES` | `OFF` | Builds the example programs |
 | `WAVELETPP_STRICT_WARNINGS` | `ON` | Enables strict warnings for first-party compiled targets |
 | `WAVELETPP_WARNINGS_AS_ERRORS` | `OFF` | Treats first-party warnings as errors |
 | `WAVELETPP_USE_LIBCXX` | `OFF` | Uses libc++ with Clang |

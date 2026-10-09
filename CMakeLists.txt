@@ -21,10 +21,17 @@ include(platform)
 include(warnings)
 include(options)
 
+include(test)
+include(CTest)
+
 add_subdirectory(waveletpp)
 
 # Generate the installed package after all exported targets have been defined.
 include(provider)
+
+if (BUILD_TESTING)
+	add_subdirectory(test)
+endif ()
 
 if (WAVELETPP_BUILD_EXAMPLES)
 	add_subdirectory(examples)
