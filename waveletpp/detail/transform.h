@@ -63,6 +63,7 @@ public:
 	{
 		m_data.rec.clear();
 		auto &l_data = m_data.dec.low;
+
 		if( l_data.empty() )
 			return ;
 
@@ -70,27 +71,17 @@ public:
 		while( l_data.size() > h_data.size() )
 			h_data.emplace_back(0.0);
 
-		for(int i=0; i<static_cast<int>(l_data.size()); i++)
+		m_data.rec.resize(l_data.size() * 2, type_tool<value_t>::zero);
+		for(size_t i=0; i<l_data.size(); i++)
 		{
-			double d_high = 0.0;
-			double d_low = 0.0;
-			int j = 0;
-
-			auto do_one = [&](int m) mutable
+			for(size_t j=0; j<m_lo_r.size(); j++)
 			{
-				int idx = (m + static_cast<int>(l_data.size())) % l_data.size();
-				d_high += h_data[idx] * m_hi_r[j];
-				d_low += l_data[idx] * m_lo_r[j];
-			};
-			int offset = static_cast<int>(m_lo_d.size()) / 2;
-			for(j=0; j<static_cast<int>(m_lo_d.size()); j+=2)
-				do_one(i + j / 2 - offset);
-			m_data.rec.emplace_back(d_low + d_high);
+				const auto dst = (i * 2 + j) % m_data.rec.size();
+				const auto filter_index = m_lo_r.size() - 1 - j;
 
-			d_high = d_low = 0.0;
-			for(j=1; j<static_cast<int>(m_lo_d.size()); j+=2)
-				do_one(i + (j + 1) / 2 - offset);
-			m_data.rec.emplace_back(d_low + d_high);
+				m_data.rec[dst] += l_data[i] * m_lo_r[filter_index] +
+				                   h_data[i] * m_hi_r[filter_index];
+			}
 		}
 	}
 
@@ -107,7 +98,7 @@ public:
 			xdata[i] = data[filter_size - 1 - i];
 
 		for(int i=0; i<static_cast<int>(filter_size); i++)
-			xdata[ + src_size + i] = data[src_size - 1 - i];
+			xdata[filter_size + src_size + i] = data[src_size - 1 - i];
 
 		data = std::move(xdata);
 		return filter_size;
@@ -231,8 +222,8 @@ typename basic_transform<T>::vector_t &basic_transform<T>::idwt(bool ext)
 	size_t ext_size[2] {0,0};
 	if( ext )
 	{
-		ext_size[0] = m_impl->m_ext_func(m_impl->m_data.dec.high, m_impl->m_filter);
-		ext_size[1] = m_impl->m_ext_func(m_impl->m_data.dec.low, m_impl->m_filter);
+		ext_size[0] = m_impl->m_ext_func(m_impl->m_data.dec.high, filter_size());
+		ext_size[1] = m_impl->m_ext_func(m_impl->m_data.dec.low, filter_size());
 	}
 	m_impl->idwt();
 

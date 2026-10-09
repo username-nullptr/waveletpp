@@ -5,43 +5,10 @@
 #define WAVELETPP_DETAIL_FILTER_H
 
 #include <stdexcept>
-#include <memory>
 #include <map>
 
 namespace waveletpp { namespace detail
 {
-
-[[nodiscard]] inline std::string wcstombs(std::wstring_view str)
-{
-	if( str.empty() )
-		return "";
-
-	auto size = str.size();
-	std::string buf(size, '\0');
-
-#ifdef _MSC_VER
-	::wcstombs_s(&size, buf.data(), size, str.data(), size);
-#else
-	std::wcstombs(buf.data(), str.data(), size);
-#endif
-	return buf;
-}
-
-[[nodiscard]] inline std::wstring mbstowcs(std::string_view str)
-{
-	if( str.empty() )
-		return L"";
-
-	auto size = str.size();
-	std::wstring buf(size, L'\0');
-
-#ifdef _MSC_VER
-	::mbstowcs_s(&size, buf.data(), size, str.data(), size);
-#else
-	std::mbstowcs(buf.data(), str.data(), size);
-#endif
-	return buf;
-}
 
 template <typename, filter>
 struct filter_name {};
@@ -142,36 +109,18 @@ inline filter_t filter_arg_enum(const filter_arg &arg)
     // return {};
 }
 
-inline std::string_view filter_arg_name(const filter_arg &arg)
+inline std::string filter_arg_name(const filter_arg &arg)
 {
-    if( arg.index() == 0 )
-        return filter_name(std::get<0>(arg));
-    else if( arg.index() == 1 )
-        return std::get<1>(arg);
-    else if( arg.index() == 2 )
-        return detail::wcstombs(std::get<2>(arg));
-    throw std::invalid_argument (
-        "waveletpp::filter_arg_enum: Invalid filter argument"
-    );
-	// return {};
+    return filter_name(filter_arg_enum(arg));
 }
 
-inline std::wstring_view filter_arg_wname(const filter_arg &arg)
+inline std::wstring filter_arg_wname(const filter_arg &arg)
 {
-    if( arg.index() == 0 )
-        return wfilter_name(std::get<0>(arg));
-    else if( arg.index() == 1 )
-        return detail::mbstowcs(std::get<1>(arg));
-    else if( arg.index() == 2 )
-        return std::get<2>(arg);
-    throw std::invalid_argument (
-        "waveletpp::filter_arg_enum: Invalid filter argument"
-    );
-    // return {};
+    return wfilter_name(filter_arg_enum(arg));
 }
 
 template <typename CharT>
-std::basic_string_view<CharT> filter_arg_name(const filter_arg &arg)
+std::basic_string<CharT> filter_arg_name(const filter_arg &arg)
 {
 	if constexpr( std::is_same_v<CharT,char> )
 		return filter_arg_name(arg);
@@ -560,14 +509,10 @@ inline std::vector<double> lo_d(const filter_arg &filter)
 				0.0,
 				0.0,
 				0.0,
-				0.0,
-				0.0,
 				0.17677669529663689,
 				0.53033008588991071,
 				0.53033008588991071,
 				0.17677669529663689,
-				0.0,
-				0.0,
 				0.0,
 				0.0,
 				0.0,

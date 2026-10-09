@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2024-2026 Xiaoqiang <username_nullptr@163.com>
 # SPDX-License-Identifier: MIT
 
-set(waveletpp_build_examples_default ON)
+set(waveletpp_build_examples_default OFF)
 
 if (DEFINED BUILD_EXAMPLES)
 	set(waveletpp_build_examples_default ${BUILD_EXAMPLES})

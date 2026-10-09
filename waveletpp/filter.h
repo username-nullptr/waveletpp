@@ -90,11 +90,11 @@ using filter_arg = std::variant <
 using filter_arg_t = filter_arg;
 
 [[nodiscard]] WAVELETPP_API filter_t filter_arg_enum(const filter_arg &arg);
-[[nodiscard]] WAVELETPP_API std::string_view filter_arg_name(const filter_arg &arg);
-[[nodiscard]] WAVELETPP_API std::wstring_view filter_arg_wname(const filter_arg &arg);
+[[nodiscard]] WAVELETPP_API std::string filter_arg_name(const filter_arg &arg);
+[[nodiscard]] WAVELETPP_API std::wstring filter_arg_wname(const filter_arg &arg);
 
 template <typename CharT>
-[[nodiscard]] WAVELETPP_TAPI std::basic_string_view<CharT> filter_arg_name(const filter_arg &arg);
+[[nodiscard]] WAVELETPP_TAPI std::basic_string<CharT> filter_arg_name(const filter_arg &arg);
 
 template <filter_t>
 struct is_filter_valid : std::false_type {};
